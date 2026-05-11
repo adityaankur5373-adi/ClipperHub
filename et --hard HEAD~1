@@ -1,0 +1,24 @@
+[33m9c056d2[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m Adding Schemas Of Database updated
+[33ma46de1b[m Delete Backend/prisma directory
+[33m2b9f10c[m Adding schmeas of database fully updated
+[33mae861c4[m adding Dashboard pages
+[33m35fe914[m adding CampaignDetails page
+[33m4841bbf[m Adding Auth Page
+[33mf511bab[m Adding Launch Campaign Page
+[33mcff2530[m Adding Landing Page
+[33m4a19ac0[m Adding App.jsx
+[33mfcce062[m Frontend Starting
+[33m133edbd[m Frontend Starting
+[33m49a94c7[m Delete frontend directory
+[33mb9523ce[m Frontend
+[33me25168b[m Frontend
+[33m3ff7ea5[m Delete frontend/src directory
+[33m9d48c00[m Landing Page
+[33m29f799e[m adding middleware for login/signup
+[33m175df95[m Delete Backend/middleware directory
+[33mabf954d[m adding submit content logic and its routes
+[33m40f38bf[m adding submit content logic and its routes
+[33m9838048[m adding account controller and routes
+[33m41a7406[m adding signup/login routes
+[33md66128c[m authController
+[33m22c515c[m adding dependencies
