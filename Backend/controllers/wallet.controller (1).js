@@ -34,7 +34,9 @@ export const requestWithdrawal = async (req, res) => {
     /* ============================= */
 
     if (!parsedAmount || parsedAmount <= 0) {
-      return res.status(400).json({ message: "Invalid amount" });
+      return res.status(400).json({
+        message: "Invalid amount",
+      });
     }
 
     /* ============================= */
@@ -43,7 +45,10 @@ export const requestWithdrawal = async (req, res) => {
 
     const result = await prisma.$transaction(async (tx) => {
 
-      // ✅ Fetch user inside transaction
+      /* ============================= */
+      /* FETCH USER */
+      /* ============================= */
+
       const user = await tx.user.findUnique({
         where: { id: userId },
         include: {
@@ -60,6 +65,10 @@ export const requestWithdrawal = async (req, res) => {
 
       const paymentMethod = user.paymentMethods[0];
 
+      /* ============================= */
+      /* VALIDATIONS */
+      /* ============================= */
+
       // ❌ no payment method
       if (!paymentMethod) {
         throw new Error("Add payment method first");
@@ -68,11 +77,6 @@ export const requestWithdrawal = async (req, res) => {
       // ❌ minimum withdrawal
       if (parsedAmount < 50) {
         throw new Error("Minimum withdrawal is ₹50");
-      }
-
-      // 🔥 CRITICAL FIX: prevent negative balance
-      if (user.balance < parsedAmount) {
-        throw new Error("Insufficient balance");
       }
 
       // ❌ already pending
@@ -88,6 +92,31 @@ export const requestWithdrawal = async (req, res) => {
       }
 
       /* ============================= */
+      /* SAFE BALANCE UPDATE */
+      /* ============================= */
+
+      // ✅ Prevent race condition
+      // ✅ Prevent negative balance
+      const updated = await tx.user.updateMany({
+        where: {
+          id: userId,
+          balance: {
+            gte: parsedAmount,
+          },
+        },
+        data: {
+          balance: {
+            decrement: parsedAmount,
+          },
+        },
+      });
+
+      // ❌ insufficient balance
+      if (updated.count === 0) {
+        throw new Error("Insufficient balance");
+      }
+
+      /* ============================= */
       /* CREATE WITHDRAWAL */
       /* ============================= */
 
@@ -96,24 +125,16 @@ export const requestWithdrawal = async (req, res) => {
           userId,
           amount: parsedAmount,
           upiId: paymentMethod.upiId,
-        },
-      });
-
-      /* ============================= */
-      /* UPDATE BALANCE */
-      /* ============================= */
-
-      await tx.user.update({
-        where: { id: userId },
-        data: {
-          balance: {
-            decrement: parsedAmount,
-          },
+          status: "PENDING",
         },
       });
 
       return withdrawal;
     });
+
+    /* ============================= */
+    /* SUCCESS RESPONSE */
+    /* ============================= */
 
     res.json({
       message: "Withdrawal request submitted",
